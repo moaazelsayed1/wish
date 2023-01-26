@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #define MAX_COMMAND_LENGTH 256
 #define MAX_ARGS 32
@@ -31,5 +32,22 @@ void run_interactive();
  * @param argc The number of arguments in the array.
  */
 void run_command(char **args, int argc);
+
+/**
+ * Splits a line into individual arguments
+ *
+ * @param line The line to be split
+ * @param args The array to store the split arguments
+ *
+ * @return The number of arguments
+ */
+int split_line(char *line, char **args);
+
+/**
+ * Trims leading and trailing whitespaces from the given command.
+ *
+ * @param command The command to trim.
+ */
+void trim(char *command);
 
 #endif
