@@ -1,0 +1,7 @@
+# Compiled object files
+*.o
+
+# Executable file
+wish
+
+
