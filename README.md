@@ -1,7 +1,6 @@
 # Unix Shell
 
-This is a custom implementation of a shell in C, created for educational purposes.
-It supports basic shell functionality such as running commands, parallel commands, redirecting output, and setting the search path.
+This is a custom implementation of a shell in C, created for educational purposes. It supports basic shell functionality such as running commands, parallel commands, redirecting output, and setting the search path.
 
 ## Specifications
 This shell is built as a project in the OSTEP course. You can find the project prompt and instructions [here](https://github.com/remzi-arpacidusseau/ostep-projects/tree/master/processes-shell).
