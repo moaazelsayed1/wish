@@ -5,7 +5,7 @@
 wish
 
 # tests output
-*.in
-*.out 
-*.rc
-*.err
+./tests-out/*.in
+./tests-out*.out 
+./tests-out*.rc
+./tests-out*.err
