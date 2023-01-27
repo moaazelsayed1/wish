@@ -1,6 +1,7 @@
 #include "wish.h"
 
 char g_errorMessage[32] = "An error has occurred\n";
+char g_finalCommand[MAX_COMMAND_LENGTH], g_outputFile[MAX_FILENMAE];
 char *g_args[MAX_ARGS];
 pid_t pid[MAX_COMMANDS];
 int num_pids = 0;
@@ -40,8 +41,16 @@ void run_batch(char *fileName) {
     int num_commands = split_commands(line, commands);
 
     for (int i = 0; i < num_commands; i++) {
+      int redirection = check_redirection(commands[i]);
+      if (redirection == -2 || redirection == -3 || redirection == -4) {
+        continue;
+      }
+
+      trim(g_finalCommand);
+      trim(g_outputFile);
+
       int argc = split_line(commands[i], g_args);
-      run_command(g_args, argc);
+      run_command(g_args, argc, redirection);
     }
 
     for (int i = 0; i < num_pids; i++) {
@@ -55,7 +64,7 @@ void run_batch(char *fileName) {
 }
 void run_interactive() {}
 
-void run_command(char **args, int argc) {
+void run_command(char **args, int argc, int redirection) {
   if (strcmp(args[0], "exit") == 0) {
     if (argc != 1) {
       write(STDERR_FILENO, g_errorMessage, strlen(g_errorMessage));
@@ -82,6 +91,10 @@ void run_command(char **args, int argc) {
     return;
   } else if (child_pid == 0) {
     // child process
+    if (redirection) {
+      handle_redirection();
+    }
+
     if (execvp(args[0], args) < 0) {
     }
   } else {
@@ -92,24 +105,52 @@ void run_command(char **args, int argc) {
 
 void path_command(int argc, char **args) {}
 
-void trim(char *command) {
-  int len = strlen(command);
-
-  int start = 0;
-  int end = len - 1;
-
-  while (start < len && isspace(command[start])) {
-    start++;
+int check_redirection(char *line) {
+  if (line[strlen(line) - 1] == '>') {
+    write(STDERR_FILENO, g_errorMessage, strlen(g_errorMessage));
+    return -4;
   }
-  while (end > start && isspace(command[end])) {
-    end--;
+  char *token = strtok(line, ">");
+  int count = 0;
+  while (token != NULL) {
+    if (count == 0) {
+      strcpy(g_finalCommand, token);
+    } else if (count == 1) {
+      if (token[0] == '\0') {
+        return -2;
+      }
+      strcpy(g_outputFile, token);
+    } else {
+      write(STDERR_FILENO, g_errorMessage, strlen(g_errorMessage));
+      return -2;
+    }
+    count++;
+    token = strtok(NULL, ">");
   }
-  int i;
-  for (i = 0; i <= end - start; i++) {
-    command[i] = command[start + i];
+  if (count == 1) {
+    return -1;
+  } else if (count == 2) {
+    char *extra = strtok(g_outputFile, " ");
+    if (extra != NULL) {
+      extra = strtok(NULL, " ");
+      if (extra != NULL) {
+        write(STDERR_FILENO, g_errorMessage, strlen(g_errorMessage));
+        return -3;
+      }
+    }
+    return count;
   }
+  return -2;
+}
 
-  command[i] = '\0';
+void handle_redirection() {
+  int file = open(g_outputFile, O_CREAT | O_TRUNC | O_WRONLY, 0644);
+  if (file < 0) {
+    write(STDERR_FILENO, g_errorMessage, strlen(g_errorMessage));
+    exit(EXIT_FAILURE);
+  }
+  dup2(file, STDOUT_FILENO);
+  close(file);
 }
 
 int split_line(char *line, char **args) {
@@ -135,4 +176,23 @@ int split_commands(char *line, char **commands) {
     i++;
   }
   return i;
+}
+void trim(char *command) {
+  int len = strlen(command);
+
+  int start = 0;
+  int end = len - 1;
+
+  while (start < len && isspace(command[start])) {
+    start++;
+  }
+  while (end > start && isspace(command[end])) {
+    end--;
+  }
+  int i;
+  for (i = 0; i <= end - start; i++) {
+    command[i] = command[start + i];
+  }
+
+  command[i] = '\0';
 }

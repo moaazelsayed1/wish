@@ -2,6 +2,7 @@
 #define WISH_H
 
 #include <ctype.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,6 +12,7 @@
 #define MAX_COMMAND_LENGTH 256
 #define MAX_ARGS 32
 #define MAX_COMMANDS 32
+#define MAX_FILENMAE 256
 
 /**
  * Runs a batch file containing a list of commands.
@@ -32,8 +34,9 @@ void run_interactive();
  *
  * @param args An array of arguments that the command takes.
  * @param argc The number of arguments in the array.
+ * @param redirection determines whether output should be printed in the terminal or to g_outputFile
  */
-void run_command(char **args, int argc);
+void run_command(char **args, int argc, int redirection);
 
 /**
  * Splits a line into individual arguments
@@ -70,5 +73,25 @@ void path_command(int argc, char **args);
  * @return The number of commands found in the command string.
  */
 int split_commands(char *command, char **commands);
+
+/**
+ * checks if a redirection symbol ">" is present in the line
+ * and separates the command from the filename
+ *
+ * @param line: the command line to be checked for redirection
+ *
+ * @return:
+ *  -1: no ">" found
+ *  -2: error, more than one ">" found
+ *  -3: error, more than one file name after ">"
+ *  -4: error using ">" without pass a file name
+ *  -1<: success, index of ">" found
+ */
+int check_redirection(char *line);
+
+/**
+ * Handle redirection of output to a file.
+ */
+void handle_redirection();
 
 #endif
