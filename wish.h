@@ -12,7 +12,7 @@
 #define MAX_ARGS 32
 
 /**
- *Runs a batch file containing a list of commands.
+ * Runs a batch file containing a list of commands.
  *
  * @param fileName the name of the batch file containing the commands to be
  *executed
