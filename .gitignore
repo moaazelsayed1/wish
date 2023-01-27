@@ -4,4 +4,7 @@
 # Executable file
 wish
 
-
+# tests output
+*.in
+*.out 
+*.rc
