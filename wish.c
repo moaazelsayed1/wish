@@ -44,7 +44,42 @@ void run_batch(char *fileName) {
 }
 void run_interactive() {}
 
-void run_command(char **args, int argc) {}
+void run_command(char **args, int argc) {
+  if (strcmp(args[0], "exit") == 0) {
+    if (argc != 1) {
+      write(STDERR_FILENO, g_errorMessage, strlen(g_errorMessage));
+    } else {
+      exit(0);
+    }
+  } else if (strcmp(args[0], "path") == 0) {
+    path_command(argc, args);
+  } else if (strcmp(args[0], "cd") == 0) {
+    if (args[1] == NULL) {
+      write(STDERR_FILENO, g_errorMessage, strlen(g_errorMessage));
+    } else {
+      if (chdir(args[1]) != 0) {
+        write(STDERR_FILENO, g_errorMessage, strlen(g_errorMessage));
+      }
+    }
+  }
+
+  pid_t child_pid = fork();
+  int status;
+  if (child_pid < 0) {
+    // fork failed
+    write(STDERR_FILENO, g_errorMessage, strlen(g_errorMessage));
+    return;
+  } else if (child_pid == 0) {
+    // child process
+    if (execvp(args[0], args) < 0) {
+    }
+  } else {
+    // parent process
+    waitpid(child_pid, &status, 0);
+  }
+}
+
+void path_command(int argc, char **args) {}
 
 void trim(char *command) {
   int len = strlen(command);
@@ -65,6 +100,7 @@ void trim(char *command) {
 
   command[i] = '\0';
 }
+
 int split_line(char *line, char **args) {
   int argc = 0;
   char *token;

@@ -1,11 +1,12 @@
 #ifndef WISH_H
 #define WISH_H
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
 #include <unistd.h>
-#include <ctype.h>
 
 #define MAX_COMMAND_LENGTH 256
 #define MAX_ARGS 32
@@ -49,5 +50,13 @@ int split_line(char *line, char **args);
  * @param command The command to trim.
  */
 void trim(char *command);
+
+/**
+ * handles path command
+ * @param argc number of arguments
+ * @param args array of arguments
+ *
+ */
+void path_command(int argc, char **args);
 
 #endif
