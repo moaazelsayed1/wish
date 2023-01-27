@@ -63,7 +63,43 @@ void run_batch(char *fileName) {
   if (line)
     free(line);
 }
-void run_interactive() {}
+void run_interactive() {
+  char *line;
+  size_t len = 0;
+  while (1) {
+    printf("wish> ");
+    getline(&line, &len, stdin);
+
+    int length = strlen(line);
+    if (length > 0 && line[length - 1] == '\n') {
+      line[length - 1] = '\0';
+    }
+    trim(line);
+
+    if (strlen(line) == 0) {
+      continue;
+    }
+
+    char *commands[MAX_COMMANDS];
+    int num_commands = split_commands(line, commands);
+
+    for (int i = 0; i < num_commands; i++) {
+      int redirection = check_redirection(commands[i]);
+      if (redirection == -2 || redirection == -3 || redirection == -4) {
+        continue;
+      }
+
+      trim(g_finalCommand);
+      trim(g_outputFile);
+      int argc = split_line(commands[i], g_args);
+
+      run_command(g_args, argc, redirection);
+    }
+    for (int i = 0; i < g_numPids; i++) {
+      waitpid(g_pid[i], NULL, 0);
+    }
+  }
+}
 
 void run_command(char **args, int argc, int redirection) {
   if (strcmp(args[0], "exit") == 0) {
