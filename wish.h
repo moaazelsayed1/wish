@@ -13,6 +13,7 @@
 #define MAX_ARGS 32
 #define MAX_COMMANDS 32
 #define MAX_FILENMAE 256
+#define MAX_PATH_LENGTH 2000
 
 /**
  * Runs a batch file containing a list of commands.
@@ -34,7 +35,8 @@ void run_interactive();
  *
  * @param args An array of arguments that the command takes.
  * @param argc The number of arguments in the array.
- * @param redirection determines whether output should be printed in the terminal or to g_outputFile
+ * @param redirection determines whether output should be printed in the
+ * terminal or to g_outputFile
  */
 void run_command(char **args, int argc, int redirection);
 
@@ -56,7 +58,10 @@ int split_line(char *line, char **args);
 void trim(char *command);
 
 /**
- * handles path command
+ * updates the current search path for the shell, If no arguments are passed,
+ * the current search path is cleared. If arguments are passed, they are
+ * concatenated with ':' separator and used as the new search path.
+ *
  * @param argc number of arguments
  * @param args array of arguments
  *
@@ -93,5 +98,6 @@ int check_redirection(char *line);
  * Handle redirection of output to a file.
  */
 void handle_redirection();
+
 
 #endif
