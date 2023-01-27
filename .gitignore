@@ -5,7 +5,4 @@
 wish
 
 # tests output
-./tests-out/*.in
-./tests-out*.out 
-./tests-out*.rc
-./tests-out*.err
+./tests-out/*
