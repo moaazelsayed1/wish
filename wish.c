@@ -88,7 +88,7 @@ void run_command(char **args, int argc, int redirection) {
   strncpy(cpath, g_path, strlen(g_path));
   char *token = strtok(cpath, ":");
   while (token != NULL) {
-    char new_path[MAX_PATH_LENGTH]; 
+    char new_path[MAX_PATH_LENGTH];
     if (token[0] != '/') {
       getcwd(new_path, MAX_PATH_LENGTH);
       strcat(new_path, "/");
@@ -96,8 +96,7 @@ void run_command(char **args, int argc, int redirection) {
     } else {
       strcpy(new_path, token);
     }
-    sprintf(new_path, "%s/%s", new_path,
-            args[0]); 
+    sprintf(new_path, "%s/%s", new_path, args[0]);
     if (access(new_path, F_OK) == 0) {
       strncpy(cpath, new_path, strlen(new_path));
       cpath[strlen(new_path)] = '\0';
