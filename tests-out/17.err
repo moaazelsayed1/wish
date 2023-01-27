@@ -1,4 +1,0 @@
-An error has occurred
-An error has occurred
-malloc(): corrupted top size
-./tester/run-tests.sh: line 27: 240075 Aborted                 (core dumped) ./wish tests/17.in

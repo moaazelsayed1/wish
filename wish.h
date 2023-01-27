@@ -99,5 +99,10 @@ int check_redirection(char *line);
  */
 void handle_redirection();
 
+/**
+ * Initializes the search path for commands by checking the PATH environment
+ * variable.
+ */
+void init_path();
 
 #endif

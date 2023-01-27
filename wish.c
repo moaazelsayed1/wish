@@ -8,6 +8,7 @@ pid_t g_pid[MAX_COMMANDS];
 int g_numPids = 0;
 
 int main(int argc, char *argv[]) {
+  init_path();
   if (argc == 1) {
     run_interactive();
   } else if (argc == 2) {
@@ -17,6 +18,16 @@ int main(int argc, char *argv[]) {
     return 1;
   }
   return 0;
+}
+
+void init_path() {
+  char *path_env = getenv("PATH");
+  if (path_env != NULL) {
+    strncpy(g_path, path_env, sizeof(g_path) - 1);
+    g_path[sizeof(g_path) - 1] = '\0';
+  } else {
+    g_path[0] = '\0';
+  }
 }
 
 void run_batch(char *fileName) {
@@ -63,6 +74,7 @@ void run_batch(char *fileName) {
   if (line)
     free(line);
 }
+
 void run_interactive() {
   char *line;
   size_t len = 0;
@@ -118,52 +130,59 @@ void run_command(char **args, int argc, int redirection) {
         write(STDERR_FILENO, g_errorMessage, strlen(g_errorMessage));
       }
     }
-  }
-  int found = 0;
-  char *cpath = (char *)malloc(strlen(g_path) + 1);
-  strncpy(cpath, g_path, strlen(g_path));
-  char *token = strtok(cpath, ":");
-  while (token != NULL) {
-    char new_path[MAX_PATH_LENGTH];
-    if (token[0] != '/') {
-      getcwd(new_path, MAX_PATH_LENGTH);
-      strcat(new_path, "/");
-      strcat(new_path, token);
-    } else {
-      strcpy(new_path, token);
-    }
-    sprintf(new_path, "%s/%s", new_path, args[0]);
-    if (access(new_path, F_OK) == 0) {
-      strncpy(cpath, new_path, strlen(new_path));
-      cpath[strlen(new_path)] = '\0';
-      found = 1;
-      break;
-    }
-    token = strtok(NULL, ":");
-  }
-  if (!found) {
-    write(STDERR_FILENO, g_errorMessage, strlen(g_errorMessage));
-    free(cpath);
-    return;
-  }
-
-  pid_t child_pid = fork();
-  int status;
-  if (child_pid < 0) {
-    // fork failed
-    write(STDERR_FILENO, g_errorMessage, strlen(g_errorMessage));
-    return;
-  } else if (child_pid == 0) {
-    // child process
-    if (redirection) {
-      handle_redirection();
-    }
-
-    if (execvp(args[0], args) < 0) {
-    }
   } else {
-    // parent process
-    waitpid(child_pid, &status, 0);
+    if (g_path[0] == '\0') {
+      write(STDERR_FILENO, g_errorMessage, strlen(g_errorMessage));
+      return;
+    }
+    int found = 0;
+    char *cpath = (char *)malloc(strlen(g_path) + 1);
+    strncpy(cpath, g_path, strlen(g_path));
+    char *token = strtok(cpath, ":");
+    while (token != NULL) {
+      char new_path[MAX_PATH_LENGTH];
+      if (token[0] != '/') {
+        getcwd(new_path, MAX_PATH_LENGTH);
+        strcat(new_path, "/");
+        strcat(new_path, token);
+      } else {
+        strcpy(new_path, token);
+      }
+      sprintf(new_path, "%s/%s", new_path, args[0]);
+      if (access(new_path, F_OK) == 0) {
+        strncpy(cpath, new_path, strlen(new_path));
+        cpath[strlen(new_path)] = '\0';
+        found = 1;
+        break;
+      }
+      token = strtok(NULL, ":");
+    }
+    if (!found) {
+      write(STDERR_FILENO, g_errorMessage, strlen(g_errorMessage));
+      free(cpath);
+      return;
+    }
+
+    pid_t child_pid = fork();
+    int status;
+    if (child_pid < 0) {
+      // fork failed
+      write(STDERR_FILENO, g_errorMessage, strlen(g_errorMessage));
+      free(cpath);
+      return;
+    } else if (child_pid == 0) {
+      // child process
+      if (redirection > 0) {
+        handle_redirection();
+      }
+
+      if (execvp(cpath, args) < 0) {
+      }
+    } else {
+      // parent process
+      g_pid[g_numPids++] = child_pid;
+    }
+    free(cpath);
   }
 }
 
