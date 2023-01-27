@@ -137,6 +137,7 @@ void run_command(char **args, int argc, int redirection) {
     }
     int found = 0;
     char *cpath = (char *)malloc(strlen(g_path) + 1);
+    char fpath[MAX_PATH_LENGTH];
     strncpy(cpath, g_path, strlen(g_path));
     char *token = strtok(cpath, ":");
     while (token != NULL) {
@@ -150,8 +151,9 @@ void run_command(char **args, int argc, int redirection) {
       }
       sprintf(new_path, "%s/%s", new_path, args[0]);
       if (access(new_path, F_OK) == 0) {
-        strncpy(cpath, new_path, strlen(new_path));
-        cpath[strlen(new_path)] = '\0';
+        strncpy(fpath, new_path, strlen(new_path));
+        fpath[strlen(new_path)] = '\0';
+        strcpy(new_path, "");
         found = 1;
         break;
       }
@@ -176,7 +178,7 @@ void run_command(char **args, int argc, int redirection) {
         handle_redirection();
       }
 
-      if (execvp(cpath, args) < 0) {
+      if (execvp(fpath, args) < 0) {
       }
     } else {
       // parent process
