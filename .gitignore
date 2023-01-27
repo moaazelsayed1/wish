@@ -8,3 +8,4 @@ wish
 *.in
 *.out 
 *.rc
+*.err
