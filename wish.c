@@ -2,6 +2,8 @@
 
 char g_errorMessage[32] = "An error has occurred\n";
 char *g_args[MAX_ARGS];
+pid_t pid[MAX_COMMANDS];
+int num_pids = 0;
 
 int main(int argc, char *argv[]) {
   if (argc == 1) {
@@ -34,8 +36,17 @@ void run_batch(char *fileName) {
     }
 
     trim(line);
-    int argc = split_line(line, g_args);
-    run_command(g_args, argc);
+    char *commands[MAX_COMMANDS];
+    int num_commands = split_commands(line, commands);
+
+    for (int i = 0; i < num_commands; i++) {
+      int argc = split_line(commands[i], g_args);
+      run_command(g_args, argc);
+    }
+
+    for (int i = 0; i < num_pids; i++) {
+      waitpid(pid[i], NULL, 0);
+    }
   }
 
   fclose(file);
@@ -113,4 +124,15 @@ int split_line(char *line, char **args) {
   args[argc] = NULL;
 
   return argc;
+}
+int split_commands(char *line, char **commands) {
+  char *token;
+  int i = 0;
+  token = strtok(line, "&");
+  while (token != NULL) {
+    commands[i] = token;
+    token = strtok(NULL, "&");
+    i++;
+  }
+  return i;
 }

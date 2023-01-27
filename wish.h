@@ -10,6 +10,7 @@
 
 #define MAX_COMMAND_LENGTH 256
 #define MAX_ARGS 32
+#define MAX_COMMANDS 32
 
 /**
  * Runs a batch file containing a list of commands.
@@ -58,5 +59,16 @@ void trim(char *command);
  *
  */
 void path_command(int argc, char **args);
+
+/**
+ * Splits a command string by the '&' delimiter and stores the resulting
+ * commands in an array.
+ *
+ * @param command The command string to split.
+ * @param commands The array to store the resulting commands in.
+ *
+ * @return The number of commands found in the command string.
+ */
+int split_commands(char *command, char **commands);
 
 #endif
